@@ -36,3 +36,17 @@ def test_backtest_is_reproducible(setup, results):
 
 def test_oracle_is_a_ceiling(results):
     assert results["oracle"].fill_rate >= results["planner"].fill_rate
+
+
+def test_buyer_by_eye_keeps_each_day_in_its_own_row(setup):
+    from purchase_planner.policy import ByEye
+    start = setup.world.start
+    buyer = ByEye(setup.context, np.random.default_rng(0))
+    buyer.seed_history(setup.history.sold[:start])
+    for day in range(start - 28, start):
+        assert (buyer.window_sales[day % 28] == setup.history.sold[day]).all()
+
+
+def test_lead_times_are_drawn_once_for_every_policy(setup):
+    lead = setup.world.lead
+    assert lead.shape == (setup.world.days, len(setup.catalog.supplier_id)) and (lead >= 1).all()

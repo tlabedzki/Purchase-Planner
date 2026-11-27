@@ -17,14 +17,14 @@ z powodem przy każdej pozycji. Test wsteczny odtwarza cały 2024 rok na prawdzi
 i porównuje planer z kupcem sklepu.
 
 <!-- generated:result -->
-**Wynik.** Na całym 2024 roku planer obsłużył 97,2% popytu (kupiec sklepu 93,0%), trzymając średnio o 921 tys. zł mniej
-w magazynie (−12%) i tracąc o 479 tys. zł mniej marży (−27%).
+**Wynik.** Na całym 2024 roku planer obsłużył 97,2% popytu (kupiec sklepu 93,0%), trzymając średnio o 917 tys. zł mniej
+w magazynie (−12%) i tracąc o 471 tys. zł mniej marży (−27%).
 <!-- /generated:result -->
 
 <!-- generated:hero -->
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/img/app-demo-dark.svg">
-  <img alt="Aplikacja Purchase Planner w ilustracji: wynik testu wstecznego 2024 (97,2% obsłużonego popytu, 921 tys. zł mniej zapasu niż u kupca sklepu), przewinięcie do planu największego dostawcy, kliknięcie pobrania zamówienia do Excela i wykres jednego produktu ze stanem, prognozą i planowanymi dostawami." src="docs/img/app-demo.svg">
+  <img alt="Aplikacja Purchase Planner w ilustracji: wynik testu wstecznego 2024 (97,2% obsłużonego popytu, 917 tys. zł mniej zapasu niż u kupca sklepu), przewinięcie do planu największego dostawcy, kliknięcie pobrania zamówienia do Excela i wykres jednego produktu ze stanem, prognozą i planowanymi dostawami." src="docs/img/app-demo.svg">
 </picture>
 <!-- /generated:hero -->
 
@@ -96,9 +96,9 @@ Na 2024 roku, w sumach tygodniowych na produkt, błąd WAPE prognozy wynosi 0,56
 i grudniu 0,47 wobec 0,55. Suma prognozy to 1,01 prawdziwego popytu (1 to brak przechyłu).
 <!-- /generated:forecast -->
 
-**Co to znaczy dla kupca.** Na zwykłych tygodniach różnica jest umiarkowana, bo pojedynczy produkt sprzedaje się
-nieregularnie i tego żadna prognoza nie zgadnie. Duża różnica jest w szczycie: średnia z ostatnich tygodni nie wie,
-że nadchodzi Black Friday, a sezon kategorii wie.
+**Co to znaczy dla kupca.** Różnica w błędzie jest umiarkowana, bo pojedynczy produkt sprzedaje się nieregularnie
+i tego żadna prognoza nie zgadnie. Dla zamówień ważniejszy jest moment: średnia z ostatnich tygodni nie wie, że
+nadchodzi Black Friday, a sezon kategorii wie, więc zamówienia rosną przed szczytem, a nie po nim.
 
 ## 4. Ile zamówić: jeden budżet zapasu zamiast stałych progów
 
@@ -120,9 +120,9 @@ jeden punkt zapasu bezpieczeństwa ponad celem 95%. Wybrane ustawienie wchodzi d
 **Wynik.**
 
 <!-- generated:allocation -->
-Ta sama prognoza ze stałymi progami ABC obsługuje 96,9% popytu, ale trzyma średnio 9,16 mln zł zapasu, więcej niż kupiec
-na oko (7,44 mln zł). Z przydziałem jednego budżetu: 97,2% przy 6,57 mln zł. Na sklepie do strojenia (seed 7) wybrane
-ustawienie daje 96,8% obsługi i 4,69 mln zł zapasu; sprawdzono 21 ustawień, 11 spełniło oba warunki.
+Ta sama prognoza ze stałymi progami ABC obsługuje 96,8% popytu, ale trzyma średnio 9,21 mln zł zapasu, więcej niż kupiec
+na oko (7,43 mln zł). Z przydziałem jednego budżetu: 97,2% przy 6,58 mln zł. Na sklepie do strojenia (seed 7) wybrane
+ustawienie daje 96,8% obsługi i 4,68 mln zł zapasu; sprawdzono 21 ustawień, 11 spełniło oba warunki.
 <!-- /generated:allocation -->
 
 **Co to znaczy dla kupca.** Stałe progi ABC dają wysoką obsługę, ale płacą za nią zapasem drogich produktów, które
@@ -149,12 +149,12 @@ zakupu.
 | Polityka | Obsłużony popyt | Średni zapas, zł | Utracona marża, zł | Utracony przychód, zł |
 |---|---:|---:|---:|---:|
 | Kupiec sklepu (dane) | 93,0% | 7,49 mln | 1,75 mln | 5,40 mln |
-| Kupiec na oko (odtworzony) | 93,3% | 7,44 mln | 1,70 mln | 5,31 mln |
-| Planer, stałe progi ABC | 96,9% | 9,16 mln | 677 tys. | 2,06 mln |
-| **Planer** | 97,2% | 6,57 mln | 1,27 mln | 7,17 mln |
-| Prognoza idealna | 99,3% | 5,55 mln | 217 tys. | 1,25 mln |
+| Kupiec na oko (odtworzony) | 93,6% | 7,43 mln | 1,64 mln | 5,05 mln |
+| Planer, stałe progi ABC | 96,8% | 9,21 mln | 696 tys. | 2,07 mln |
+| **Planer** | 97,2% | 6,58 mln | 1,28 mln | 7,17 mln |
+| Prognoza idealna | 99,4% | 5,56 mln | 225 tys. | 1,14 mln |
 
-![Planer trzyma średnio o 921 tys. zł mniej w magazynie przez cały 2024 rok](docs/img/stock-over-year.png)
+![Planer trzyma średnio o 917 tys. zł mniej w magazynie przez cały 2024 rok](docs/img/stock-over-year.png)
 
 ![Kupiec na oko traci najwięcej w szczycie: 14% popytu w listopadzie, planer 3%](docs/img/lost-by-month.png)
 <!-- /generated:backtest -->
@@ -176,9 +176,9 @@ pobrania oraz produkt: sprzedaż, stan, prognozę i planowane dostawy.
 **Wynik.**
 
 <!-- generated:plan -->
-Plan na 30 dni od 01.01.2025 ma 783 linie u 23 dostawców na 511 tys. zł; zamówienia pewne (pierwszy dzień zamówień
-każdego dostawcy) to 83 linie na 67 tys. zł. Największa pozycja pewna: Dress Reserved Elegant Midi (Korvenna Industrial
-Co., Ltd.), 50 szt., z powodem w aplikacji (po angielsku): „40 in stock and 30 on the way last about 41 days; the next
+Plan na 30 dni od 01.01.2025 ma 815 linii u 23 dostawców na 555 tys. zł; zamówienia pewne (pierwszy dzień zamówień
+każdego dostawcy) to 111 linii na 89 tys. zł. Największa pozycja pewna: Dress Reserved Elegant Midi (Korvenna Industrial
+Co., Ltd.), 50 szt., z powodem w aplikacji (po angielsku): „39 in stock and 30 on the way last about 40 days; the next
 39 days, until the following delivery, need about 67, so the plan tops up to 117 (5% risk of running out): 50 units, 5
 packs of 10.”
 
@@ -195,11 +195,11 @@ z Chin.
 | Kryterium | Planer | Ocena |
 |---|---|---|
 | Obsłużony popyt co najmniej 95% | 97,2% | tak |
-| Średni zapas niższy niż u kupca sklepu | 6,57 mln wobec 7,49 mln zł | tak |
-| Średni zapas niższy niż u kupca na oko (odtworzonego) | 6,57 mln wobec 7,44 mln zł | tak |
-| Utracona marża niższa niż u kupca sklepu | 1,27 mln wobec 1,75 mln zł | tak |
+| Średni zapas niższy niż u kupca sklepu | 6,58 mln wobec 7,49 mln zł | tak |
+| Średni zapas niższy niż u kupca na oko (odtworzonego) | 6,58 mln wobec 7,43 mln zł | tak |
+| Utracona marża niższa niż u kupca sklepu | 1,28 mln wobec 1,75 mln zł | tak |
 | Utracony przychód niższy niż u kupca sklepu | 7,17 mln wobec 5,40 mln zł | nie |
-| Blisko prognozy idealnej (sufit) | 97,2% i 6,57 mln zł wobec 99,3% i 5,55 mln zł | częściowo |
+| Blisko prognozy idealnej (sufit) | 97,2% i 6,58 mln zł wobec 99,4% i 5,56 mln zł | częściowo |
 <!-- /generated:verdicts -->
 
 **Gdzie metody się pomyliły i czego to uczy.**
@@ -233,6 +233,8 @@ Pomyłki pokazane wprost są tu wartością: prawdziwy popyt i rok kupca są zap
 - Wynik pochodzi z jednego sklepu (seed 42), a ustawienia z drugiego (seed 7). Inny sklep da inne liczby.
 - Zwroty trafiają do outletu i nie wracają na stan, a anulowane zamówienia nie oddają towaru (uproszczenie
   Data-Generatora). Jeden magazyn, bez limitu budżetu i rabatów ilościowych.
+- Planer zna z katalogu daty wycofania produktów (kupiec na oko też), a wagi budżetu liczy z bieżącej ceny katalogowej.
+  Sklep zna swoje plany wycofania, a sprawdzenie bez tej wiedzy zmieniło średni zapas o 0,2%.
 - W prawdziwym sklepie nie ma `lost_demand_data`. Planer go nie potrzebuje, ale test wsteczny musiałby oszacować
   utracony popyt z dni bez towaru.
 
@@ -367,7 +369,7 @@ pip install -r requirements-dev.txt
 python -m pytest
 ```
 
-28 testów (około 4 sekund) na próbce w repo sprawdza kalendarz, regresję i TSB, kwantyle, opakowania i minimum,
+30 testów (około 4 sekund) na próbce w repo sprawdza kalendarz, regresję i TSB, kwantyle, opakowania i minimum,
 spójność historii, bilans popytu w teście wstecznym, powtarzalność, plan, plik Excela i aplikację.
 
 ## Licencja

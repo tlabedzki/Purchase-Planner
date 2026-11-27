@@ -106,8 +106,10 @@ def build_plan(source, days: int = HORIZON_DAYS, price_of_service: float = PRICE
     lead_days = np.ceil(context.lead_mean).astype(int)
     for row in orders[orders["received_date"].isna()].itertuples():
         p = int(position[row.product_id])
-        expected = (row.order_date - dates[0]).days + int(lead_days[catalog.supplier[p]])
-        arrivals.setdefault(max(expected, start), []).append((p, float(row.ordered_quantity)))
+        expected = max((row.order_date - dates[0]).days + int(lead_days[catalog.supplier[p]]), start)
+        if dates[expected].weekday() == 6:
+            expected += 1  # no deliveries on Sunday
+        arrivals.setdefault(expected, []).append((p, float(row.ordered_quantity)))
         on_order[p] += row.ordered_quantity
 
     lines, firm_done = [], set()
@@ -116,6 +118,7 @@ def build_plan(source, days: int = HORIZON_DAYS, price_of_service: float = PRICE
             on_hand[p] += q
             on_order[p] -= q
         daily = state.base * context.season[t]
+        on_hand = np.maximum(on_hand - daily * (on_hand > 0), 0.0)  # the day's projected sales, before ordering
         ordering = context.ordering(t)
         if len(ordering):
             goal = planner.targets(t, ordering)
@@ -146,7 +149,6 @@ def build_plan(source, days: int = HORIZON_DAYS, price_of_service: float = PRICE
                 arrivals.setdefault(arrive, []).append((p, float(quantity[p])))
                 on_order[p] += quantity[p]
             firm_done.update(int(s) for s in ordering)
-        on_hand = np.maximum(on_hand - daily * (on_hand > 0), 0.0)  # projected sales
 
     plan = pd.DataFrame(lines, columns=[c for c in PLAN_COLUMNS if c != "reason"])
     plan["reason"] = [reason(row) for _, row in plan.iterrows()] if len(plan) else []

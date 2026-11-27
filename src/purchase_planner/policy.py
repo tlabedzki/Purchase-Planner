@@ -220,8 +220,10 @@ class ByEye:
         self.window_sales = np.zeros((self.history_days, self.context.catalog.size))
 
     def seed_history(self, sold: np.ndarray) -> None:
-        """The last history_days of sales before the backtest."""
-        self.window_sales[:] = sold[-self.history_days:]
+        """The last history_days of sales before the backtest, each day in the row observe() gives it."""
+        start = len(sold)
+        for day in range(start - self.history_days, start):
+            self.window_sales[day % self.history_days] = sold[day]
 
     def observe(self, t, sold, observed, launched, first_quantity):
         self.window_sales[t % self.history_days] = sold

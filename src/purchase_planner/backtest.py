@@ -5,7 +5,8 @@ The year starts from the shop's real state on its first day (stock and the purch
 Data-Generator). Every day deliveries arrive, the day's order lines are served first come first served while the stock
 lasts (a line that does not fit is lost, as in Data-Generator), and on each supplier's order days the policy orders.
 A delivery comes after a lead time drawn from the supplier's true lead time (the "world" of the backtest; the policy
-only knows the lead times seen in the purchase order history). True demand is every order line of the year plus the
+only knows the lead times seen in the purchase order history). The draws are made once per day and supplier, so every
+policy meets the same lead times. True demand is every order line of the year plus the
 lines Data-Generator lost to an empty shelf (lost_demand_data), so the backtest is the only place that reads the truth.
 """
 from __future__ import annotations
@@ -50,6 +51,7 @@ class World:
     first_quantity: np.ndarray  # first delivery of products launched in the year
     true_lead_mean: np.ndarray
     true_lead_cv: np.ndarray
+    lead: np.ndarray  # days x suppliers: the lead time of an order placed that day, the same for every policy
 
     def demand(self) -> np.ndarray:
         """True demand per day of the year and product."""
@@ -92,13 +94,16 @@ def build_world(tables: dict[str, pd.DataFrame], catalog: Catalog, history: Hist
     first_quantity[position.loc[first_launch["product_id"]].to_numpy()] = first_launch["ordered_quantity"].to_numpy()
 
     suppliers = tables["supplier_data"].set_index("supplier_id").loc[catalog.supplier_id]
+    mean, cv = suppliers["true_lead_time_mean_days"].to_numpy(), suppliers["true_lead_time_cv"].to_numpy()
+    sigma = np.sqrt(np.log1p(cv ** 2))
+    normal = np.random.default_rng(LEAD_TIME_SEED).standard_normal((days, len(mean)))
+    lead = np.maximum(1, np.round(np.exp(np.log(mean) - sigma ** 2 / 2 + sigma * normal))).astype(int)
     line_day = day[order]
     return World(start=start, days=days, line_day=line_day, line_product=product[order],
                  line_quantity=lines["quantity"].to_numpy()[order], line_revenue=revenue[order],
                  line_margin=margin[order], day_start=np.searchsorted(line_day, np.arange(days + 1)),
                  opening=history.stock[start - 1].copy(), arrivals=arrivals, first_quantity=first_quantity,
-                 true_lead_mean=suppliers["true_lead_time_mean_days"].to_numpy(),
-                 true_lead_cv=suppliers["true_lead_time_cv"].to_numpy())
+                 true_lead_mean=mean, true_lead_cv=cv, lead=lead)
 
 
 @dataclass
@@ -131,15 +136,8 @@ class Result:
                 "lost_margin": round(self.lost_margin, 2), "order_lines": self.order_lines}
 
 
-def draw_lead(world: World, suppliers: np.ndarray, rng: np.random.Generator) -> np.ndarray:
-    sigma = np.sqrt(np.log1p(world.true_lead_cv[suppliers] ** 2))
-    mu = np.log(world.true_lead_mean[suppliers]) - sigma ** 2 / 2
-    return np.maximum(1, np.round(np.exp(mu + sigma * rng.standard_normal(len(suppliers))))).astype(int)
-
-
 def simulate(world: World, context: Context, policy, catalog: Catalog) -> Result:
     count = catalog.size
-    rng = np.random.default_rng(LEAD_TIME_SEED)
     on_hand = world.opening.astype(np.int64).copy()
     on_order = np.zeros(count, dtype=np.int64)
     arrivals = {day: list(items) for day, items in world.arrivals.items()}
@@ -192,9 +190,8 @@ def simulate(world: World, context: Context, policy, catalog: Catalog) -> Result
             quantity = policy.order(t, ordering, on_hand, on_order)
             products = np.flatnonzero(quantity)
             if len(products):
-                lead = dict(zip(ordering, draw_lead(world, ordering, rng), strict=True))
                 for p in products:
-                    arrive = d + int(lead[catalog.supplier[p]])
+                    arrive = d + int(world.lead[d, catalog.supplier[p]])
                     if (context.dates[0] + pd.Timedelta(days=t + arrive - d)).weekday() == 6:
                         arrive += 1  # no deliveries on Sunday
                     arrivals.setdefault(arrive, []).append((p, int(quantity[p])))
