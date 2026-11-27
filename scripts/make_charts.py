@@ -72,20 +72,21 @@ def blocks(n: dict) -> dict[str, str]:
     out = {}
     if pl:
         out["result"] = (
-            f"**Wynik.** Na całym 2024 roku planer obsłużył {pct(k['fill_planner'])} popytu (kupiec sklepu "
-            f"{pct(k['fill_buyer'])}), trzymając średnio o {money(k['cash_freed'])} zł mniej w magazynie "
-            f"({pct(k['stock_change'], 0, True)}) i tracąc o {money(k['margin_saved'])} zł mniej marży "
+            f"**Wynik.** W całym 2024 roku planer obsłużył {pct(k['fill_planner'])} popytu (kupiec sklepu "
+            f"{pct(k['fill_buyer'])}). Średni zapas był przy tym o {money(k['cash_freed'])} zł niższy "
+            f"({pct(k['stock_change'], 0, True)}), a utracona marża o {money(k['margin_saved'])} zł mniejsza "
             f"({pct(k['margin_change'], 0, True)}).")
         out["summary"] = (
             f"- **Trafione:** w listopadzie i grudniu prognoza myli się mniej niż średnia z 28 dni (WAPE "
-            f"{num(q['wape_peak'], 2)} wobec {num(q['wape_peak_naive'], 2)}), a planer nie gubi szczytu Black Friday.\n"
+            f"{num(q['wape_peak'], 2)} wobec {num(q['wape_peak_naive'], 2)}), a planer nadąża za szczytem Black "
+            f"Friday.\n"
             f"- **Chybione:** utracony przychód jest wyższy niż u kupca ({money(k['revenue_planner'])} wobec "
-            f"{money(k['revenue_buyer'])} zł), bo planer częściej odpuszcza drogie produkty z niską marżą.")
+            f"{money(k['revenue_buyer'])} zł), bo u planera częściej brakuje drogich produktów z niską marżą.")
         out["forecast"] = (
-            f"Na 2024 roku, w sumach tygodniowych na produkt, błąd WAPE prognozy wynosi {num(q['wape'], 2)}, "
+            f"W 2024 roku, w sumach tygodniowych na produkt, błąd WAPE prognozy wynosi {num(q['wape'], 2)}, "
             f"a średniej z 28 dni {num(q['wape_naive'], 2)}; w listopadzie i grudniu {num(q['wape_peak'], 2)} wobec "
-            f"{num(q['wape_peak_naive'], 2)}. Suma prognozy to {num(q['bias'], 2)} prawdziwego popytu (1 to brak "
-            f"przechyłu).")
+            f"{num(q['wape_peak_naive'], 2)}. Suma prognozy to {num(q['bias'], 2)} prawdziwego popytu (1 oznacza, że "
+            f"prognoza ani nie zawyża, ani nie zaniża popytu).")
         header = "| Polityka | Obsłużony popyt | Średni zapas, zł | Utracona marża, zł | Utracony przychód, zł |"
     else:
         out["result"] = (
@@ -119,15 +120,17 @@ def blocks(n: dict) -> dict[str, str]:
         out["allocation"] = (
             f"Ta sama prognoza ze stałymi progami ABC obsługuje {pct(abc['fill_rate'])} popytu, ale trzyma średnio "
             f"{money(abc['average_stock_value'])} zł zapasu, więcej niż kupiec na oko "
-            f"({money(eye['average_stock_value'])} zł). Z przydziałem jednego budżetu: {pct(k['fill_planner'])} "
+            f"({money(eye['average_stock_value'])} zł). Z jednym wspólnym budżetem: {pct(k['fill_planner'])} "
             f"przy {money(k['stock_planner'])} zł. "
-            f"Na sklepie do strojenia (seed 7) wybrane ustawienie daje {pct(chosen['fill_rate'])} obsługi i "
-            f"{money(chosen['average_stock_value'])} zł zapasu; sprawdzono {len(grid)} ustawień, "
-            f"{int(grid['allowed'].sum())} spełniło oba warunki.")
+            f"W sklepie do strojenia (seed 7) wybrane ustawienie daje {pct(chosen['fill_rate'])} obsługi i "
+            f"{money(chosen['average_stock_value'])} zł zapasu; sprawdzono {len(grid)} "
+            f"{report.plural_pl(len(grid), 'ustawienie', 'ustawienia', 'ustawień')}, a {int(grid['allowed'].sum())} "
+            f"{report.plural_pl(int(grid['allowed'].sum()), 'spełniło', 'spełniły', 'spełniło')} oba warunki.")
         out["plan"] = (
             f"Plan na {plan.HORIZON_DAYS} dni od {month['order_date'].min():%d.%m.%Y} ma {num(len(month))} "
             f"{report.plural_pl(len(month), 'linię', 'linie', 'linii')} u {month['supplier_id'].nunique()} "
-            f"dostawców na {money(month['order_value'].sum())} zł; zamówienia pewne (pierwszy dzień zamówień każdego "
+            f"{report.plural_pl(month['supplier_id'].nunique(), 'dostawcy', 'dostawców', 'dostawców')} na "
+            f"{money(month['order_value'].sum())} zł; zamówienia pewne (pierwszy dzień zamówień każdego "
             f"dostawcy) to {num(len(firm))} {report.plural_pl(len(firm), 'linia', 'linie', 'linii')} na "
             f"{money(firm['order_value'].sum())} zł. Największa pozycja pewna: {example['product_name']} "
             f"({example['supplier_name']}), {example['quantity']} szt., z powodem w aplikacji (po angielsku): "
