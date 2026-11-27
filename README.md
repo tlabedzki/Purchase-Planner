@@ -375,7 +375,7 @@ pip install -r requirements-dev.txt
 python -m pytest
 ```
 
-30 tests (about 4 seconds) on the sample in the repository check the calendar, the regression and TSB, the quantiles,
+35 tests (about 4 seconds) on the sample in the repository check the calendar, the regression and TSB, the quantiles,
 packs and minimums, the consistency of the history, the demand balance of the backtest, reproducibility, the plan,
 the Excel file and the app.
 

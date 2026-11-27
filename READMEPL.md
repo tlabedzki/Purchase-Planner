@@ -381,7 +381,7 @@ pip install -r requirements-dev.txt
 python -m pytest
 ```
 
-30 testów (około 4 sekund) na próbce w repozytorium sprawdza kalendarz, regresję i TSB, kwantyle, opakowania i minima,
+35 testów (około 4 sekund) na próbce w repozytorium sprawdza kalendarz, regresję i TSB, kwantyle, opakowania i minima,
 spójność historii, bilans popytu w teście wstecznym, powtarzalność wyników, plan, plik Excela i aplikację.
 
 ## Licencja
