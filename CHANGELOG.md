@@ -3,6 +3,16 @@
 All notable changes to this project are documented in this file. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.0.1] - 2026-11-27
+
+### Added
+
+- A Polish version of the README (`READMEPL.md`) with an English | Polski link under the title of both files.
+
+### Fixed
+
+- Polish README texts from `scripts/make_charts.py`: plural forms agree with the count and several sentences read more naturally.
+
 ## [1.0.0] - 2026-11-27
 
 ### Added
