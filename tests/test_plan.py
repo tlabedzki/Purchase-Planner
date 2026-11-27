@@ -45,3 +45,8 @@ def test_workbook_per_supplier(month):
 
 def test_an_order_only_when_the_stock_is_below_the_target(month):
     assert (month["on_hand"] + month["on_order"] < month["order_up_to"]).all()
+
+
+def test_no_delivery_on_sunday_and_cover_from_the_period(month):
+    assert (month["expected_delivery"].dt.weekday != 6).all()
+    assert (month["daily_forecast"] * month["protection_days"] - month["period_demand"]).abs().max() < 0.1

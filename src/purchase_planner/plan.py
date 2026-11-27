@@ -8,12 +8,14 @@ reads only what the shop knows (sales, stock, purchase orders, the catalog), nev
 """
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 import numpy as np
 import pandas as pd
 
 from purchase_planner import forecast
 from purchase_planner.forecast import TSB
-from purchase_planner.history import build_catalog, build_history, lead_times
+from purchase_planner.history import Catalog, History, build_catalog, build_history, lead_times
 from purchase_planner.policy import PRICE_OF_SERVICE, VALUE_EXPONENT, Context, Planner, round_up_to_pack
 
 HORIZON_DAYS = 30
@@ -45,9 +47,27 @@ def reason(row) -> str:
             f"({risk:.0%} risk of running out): {units}, {rounding}.")
 
 
-def build_plan(tables: dict[str, pd.DataFrame], days: int = HORIZON_DAYS, price_of_service: float = PRICE_OF_SERVICE,
-               value_exponent: float = VALUE_EXPONENT) -> pd.DataFrame:
-    """Plan lines of every supplier for `days` days from the day after the data ends (columns PLAN_COLUMNS)."""
+@dataclass
+class Planning:
+    """What the plan is made from: the catalog, the history, the forecast state and the calendar after the data."""
+
+    tables: dict
+    catalog: Catalog
+    history: History
+    context: Context
+    state: TSB
+
+    @property
+    def start(self) -> int:
+        """First day of the plan, position in context.dates (the day after the data ends)."""
+        return len(self.history.dates)
+
+    def forecast(self, product: int, days: int) -> np.ndarray:
+        """Expected units a day of one product (position) for `days` days from the start of the plan."""
+        return self.state.base[product] * self.context.season[self.start:self.start + days, product]
+
+
+def prepare(tables: dict[str, pd.DataFrame], days: int = HORIZON_DAYS) -> Planning:
     catalog = build_catalog(tables)
     history = build_history(tables, catalog)
     first = history.dates[-1] + pd.Timedelta(days=1)
@@ -62,6 +82,19 @@ def build_plan(tables: dict[str, pd.DataFrame], days: int = HORIZON_DAYS, price_
                       stop_day=np.where(np.isnan(stop), len(dates) + 10_000, stop).astype(int),
                       launch_day=np.clip(launch, 0, None))
     state = forecast.run_tsb(TSB.start(catalog.size), history.sold, context.season[:len(history.dates)], observed)
+    return Planning(tables, catalog, history, context, state)
+
+
+def build_plan(source, days: int = HORIZON_DAYS, price_of_service: float = PRICE_OF_SERVICE,
+               value_exponent: float = VALUE_EXPONENT) -> pd.DataFrame:
+    """
+    Plan lines of every supplier for `days` days from the day after the data ends (columns PLAN_COLUMNS).
+    `source` is the shop's tables or a Planning from prepare().
+    """
+    planning = source if isinstance(source, Planning) else prepare(source, days)
+    tables, catalog, history = planning.tables, planning.catalog, planning.history
+    context, dates = planning.context, planning.context.dates
+    state = TSB(planning.state.p.copy(), planning.state.z.copy(), planning.state.v.copy())
     planner = Planner(context, state, price_of_service, value_exponent)
 
     start = len(history.dates)
@@ -92,21 +125,25 @@ def build_plan(tables: dict[str, pd.DataFrame], days: int = HORIZON_DAYS, price_
             quantity = np.where(need > 0, np.maximum(round_up_to_pack(need, catalog.pack), catalog.moq), 0)
             for p in np.flatnonzero(quantity):
                 s = catalog.supplier[p]
+                arrive = t + int(lead_days[s])
+                if dates[arrive].weekday() == 6:
+                    arrive += 1  # no deliveries on Sunday
                 lines.append({
                     "supplier_id": catalog.supplier_id[s], "supplier_name": catalog.supplier_name[s],
                     "order_date": dates[t], "status": "projected" if s in firm_done else "firm",
-                    "expected_delivery": dates[t] + pd.Timedelta(days=int(lead_days[s])),
+                    "expected_delivery": dates[arrive],
                     "product_id": catalog.product_id[p], "product_name": catalog.name[p],
                     "category": catalog.category[p], "quantity": int(quantity[p]),
                     "packs": int(quantity[p] // catalog.pack[p]), "pack_size": int(catalog.pack[p]),
                     "min_order_quantity": int(catalog.moq[p]), "unit_cost": float(catalog.unit_cost[p]),
                     "order_value": round(float(quantity[p] * catalog.unit_cost[p]), 2),
                     "on_hand": int(whole[p]), "on_order": int(on_order[p]),
-                    "daily_forecast": round(float(daily[p]), 3), "protection_days": int(goal.period[p]),
+                    "daily_forecast": round(float(goal.mean[p] / goal.period[p]), 3),
+                    "protection_days": int(goal.period[p]),
                     "period_demand": round(float(goal.mean[p]), 1), "order_up_to": float(goal.target[p]),
                     "service_level": round(float(goal.level[p]), 3),
                 })
-                arrivals.setdefault(t + int(lead_days[s]), []).append((p, float(quantity[p])))
+                arrivals.setdefault(arrive, []).append((p, float(quantity[p])))
                 on_order[p] += quantity[p]
             firm_done.update(int(s) for s in ordering)
         on_hand = np.maximum(on_hand - daily * (on_hand > 0), 0.0)  # projected sales

@@ -1,3 +1,6 @@
 -r requirements.txt
 pytest~=9.2.0
 ruff~=0.17.6
+# scripts/screenshot_app.py and make_charts.py drive headless Chrome or Edge
+websockets~=15.0.1
+pillow~=13.0.0

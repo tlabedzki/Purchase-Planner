@@ -21,20 +21,10 @@ sys.path.insert(0, str(ROOT / "src"))
 
 import pandas as pd  # noqa: E402
 
-from purchase_planner import backtest, data, export, plan, policy  # noqa: E402
+from purchase_planner import backtest, data, export, plan, policy, report  # noqa: E402
 
 OUTPUT = ROOT / "output"
 FILL_RATE_GOAL = 0.95
-LABELS = {"shop_history": "Shop's buyer (data)", "by_eye": "Buyer by eye (rebuilt)",
-          "planner_abc": "Planner, fixed ABC service", "planner": "Planner", "oracle": "Perfect forecast"}
-
-
-def backtest_table(results: dict) -> pd.DataFrame:
-    table = pd.DataFrame([results[name].summary() for name in backtest.POLICIES])
-    table.insert(1, "label", table["policy"].map(LABELS))
-    return table
-
-
 def print_table(table: pd.DataFrame) -> None:
     view = table.assign(fill_rate=(table["fill_rate"] * 100).map("{:.1f}%".format),
                         average_stock_value=(table["average_stock_value"] / 1e6).map("{:.2f} M".format),
@@ -46,7 +36,7 @@ def print_table(table: pd.DataFrame) -> None:
 
 def run(seed: int) -> tuple[pd.DataFrame, pd.DataFrame]:
     setup = backtest.prepare(data.load(seed, truth=True))
-    table = backtest_table(backtest.run_all(setup))
+    table = report.backtest_table(backtest.run_all(setup))
     month = plan.build_plan(data.load(seed))
     return table, month
 
