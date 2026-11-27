@@ -1,11 +1,10 @@
 # Purchase Planner
 
-[English](README.md) | **Polski**
-
 [![Tests](https://github.com/tlabedzki/Purchase-Planner/actions/workflows/tests.yml/badge.svg)](https://github.com/tlabedzki/Purchase-Planner/actions/workflows/tests.yml)
 ![Python 3.11](https://img.shields.io/badge/python-3.11-3776AB)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 [![Release](https://img.shields.io/github/v/release/tlabedzki/Purchase-Planner)](https://github.com/tlabedzki/Purchase-Planner/releases)
+[![English](docs/img/flag-gb.svg "English")](README.md)
 
 Studium przypadku i narzędzie: plan zakupów na 30 dni dla każdego dostawcy Lumo, fikcyjnego sklepu internetowego,
 sprawdzony na danych z całego 2024 roku.
