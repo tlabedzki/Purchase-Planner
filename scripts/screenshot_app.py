@@ -2,9 +2,10 @@
 Start the app on 127.0.0.1, take screenshots in headless Chrome and check the portfolio look in the running page:
 the font of the heading, a number and a table cell (Inter, tabular figures) and that no font comes from a service.
 
-    python scripts/screenshot_app.py [output folder]      # default docs/img
+    python scripts/screenshot_app.py [output folder]      # default output/shots
 
-Writes app.png (the backtest), app-plan.png, app-product.png, app-phone.png (the hero on a phone) and look.json.
+Writes docs/img/app-plan.png (the README's plan chapter) and, in the output folder, app.png (the backtest),
+app-product.png and app-phone.png (the hero on a phone) for review, and output/look.json.
 """
 from __future__ import annotations
 
@@ -41,7 +42,7 @@ async def capture(folder: Path) -> dict:
         await asyncio.sleep(1.5)
         look = await page.js(LOOK)
         await page.shot("#backtest", folder / "app.png", pad=24, full_width=True)
-        await page.shot("#plan", folder / "app-plan.png", pad=24, full_width=True)
+        await page.shot("#plan", ROOT / "docs" / "img" / "app-plan.png", pad=24, full_width=True)
         await page.shot("#one-product", folder / "app-product.png", pad=24, full_width=True)
         await page.viewport(390, 844, scale=3, mobile=True)
         await page.open(URL)
@@ -52,7 +53,7 @@ async def capture(folder: Path) -> dict:
 
 
 def main() -> None:
-    folder = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "docs" / "img"
+    folder = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "output" / "shots"
     folder.mkdir(parents=True, exist_ok=True)
     env = {**os.environ, "PP_PORT": str(PORT), "MPLBACKEND": "Agg"}
     app = subprocess.Popen([sys.executable, "-m", "ui.app"], cwd=ROOT, env=env, stdout=subprocess.DEVNULL,
@@ -62,7 +63,8 @@ def main() -> None:
         look = asyncio.run(capture(folder))
     finally:
         stop_tree(app)
-    (folder / "look.json").write_text(json.dumps(look, indent=2), encoding="utf-8")
+    (ROOT / "output").mkdir(exist_ok=True)
+    (ROOT / "output" / "look.json").write_text(json.dumps(look, indent=2), encoding="utf-8")
     print(json.dumps(look, indent=2))
 
 
