@@ -3,7 +3,7 @@
 All notable changes to this project are documented in this file. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [1.0.0] - 2026-11-27
 
 ### Added
 - Daily demand forecast per product: a Poisson regression season per category (month, weekday, trading days) times
@@ -15,3 +15,9 @@ All notable changes to this project are documented in this file. The format is b
 - The 30-day purchase plan per supplier with a reason per line, an Excel order per supplier and `main.py --check`.
 - A Dash app with Mantine in the portfolio look: the backtest, the plan of one supplier with its download and one
   product with its stock, forecast and planned deliveries.
+- The README as a case study in English (the repository is public from this release), with charts and the animated
+  demo rendered in English by `scripts/make_charts.py --lang en` and `scripts/make_demo_svg.py --lang en`.
+
+### Data
+- Data Generator v1.8.0 (public tag) with stockouts on, seeds 42 and 7: `scripts/get_data.py` gives the same tables
+  byte for byte as the release branch it was built on.

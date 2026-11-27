@@ -1,6 +1,6 @@
 [project]
 name = "purchase-planner"
-version = "0.1.0"
+version = "1.0.0"
 description = "A 30-day purchase plan per supplier from a demand forecast, stock and lead times"
 requires-python = ">=3.11"
 license = "MIT"
