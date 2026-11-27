@@ -41,3 +41,7 @@ def test_workbook_per_supplier(month):
     assert sheet.max_row == 4 + lines + 1
     assert sheet.cell(row=4 + lines + 1, column=1).value == "Total"
     assert str(sheet.cell(row=4 + lines + 1, column=10).value).startswith("=SUM(")
+
+
+def test_an_order_only_when_the_stock_is_below_the_target(month):
+    assert (month["on_hand"] + month["on_order"] < month["order_up_to"]).all()

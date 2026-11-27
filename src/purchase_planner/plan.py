@@ -26,7 +26,7 @@ PLAN_COLUMNS = ["supplier_id", "supplier_name", "order_date", "status", "expecte
 def reason(row) -> str:
     """One sentence on why this quantity, from the numbers of the plan line."""
     daily = row["daily_forecast"]
-    on_hand, on_order = int(np.floor(row["on_hand"])), int(np.floor(row["on_order"]))
+    on_hand, on_order = int(row["on_hand"]), int(row["on_order"])
     position = on_hand + on_order
     cover = f"about {position / daily:.0f} days" if daily > 0 else "a long time"
     if position <= 0:
@@ -86,7 +86,8 @@ def build_plan(tables: dict[str, pd.DataFrame], days: int = HORIZON_DAYS, price_
         ordering = context.ordering(t)
         if len(ordering):
             goal = planner.targets(t, ordering)
-            stock_position = on_hand + on_order
+            whole = np.floor(on_hand + 1e-9)  # projected stock in whole units
+            stock_position = whole + on_order
             need = np.where(goal.products & (stock_position < goal.target), goal.target - stock_position, 0.0)
             quantity = np.where(need > 0, np.maximum(round_up_to_pack(need, catalog.pack), catalog.moq), 0)
             for p in np.flatnonzero(quantity):
@@ -100,7 +101,7 @@ def build_plan(tables: dict[str, pd.DataFrame], days: int = HORIZON_DAYS, price_
                     "packs": int(quantity[p] // catalog.pack[p]), "pack_size": int(catalog.pack[p]),
                     "min_order_quantity": int(catalog.moq[p]), "unit_cost": float(catalog.unit_cost[p]),
                     "order_value": round(float(quantity[p] * catalog.unit_cost[p]), 2),
-                    "on_hand": round(float(on_hand[p]), 1), "on_order": round(float(on_order[p]), 1),
+                    "on_hand": int(whole[p]), "on_order": int(on_order[p]),
                     "daily_forecast": round(float(daily[p]), 3), "protection_days": int(goal.period[p]),
                     "period_demand": round(float(goal.mean[p]), 1), "order_up_to": float(goal.target[p]),
                     "service_level": round(float(goal.level[p]), 3),
