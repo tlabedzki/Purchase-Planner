@@ -16,6 +16,7 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
 RAW_DIR = ROOT / "data" / "raw"
+SAMPLE_DIR = ROOT / "data" / "sample"  # three suppliers, 2023-2024, cut by scripts/make_sample.py (in git, for tests)
 
 DATA_GENERATOR_TAG = "v1.8.0"
 SEEDS = [42, 7]
@@ -57,7 +58,15 @@ def load(seed: int = REPORT_SEED, truth: bool = False) -> dict[str, pd.DataFrame
     Returns:
     dict: Table names mapped to DataFrames.
     """
-    folder = seed_dir(seed)
+    return read(seed_dir(seed), truth)
+
+
+def load_sample(truth: bool = False) -> dict[str, pd.DataFrame]:
+    """The small sample in data/sample/ (for tests and CI)."""
+    return read(SAMPLE_DIR, truth)
+
+
+def read(folder: Path, truth: bool) -> dict[str, pd.DataFrame]:
     if not folder.exists():
         raise FileNotFoundError(f"No data in {folder}. Run: python scripts/get_data.py")
     tables = {}
